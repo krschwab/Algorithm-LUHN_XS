@@ -30,10 +30,15 @@ Perl Algorithm::LUHN module, while the faster check\_digit\_fast and really fast
 check\_digit\_rff are not. 
 
 How much faster? Here's a benchmark, running on a 3.4GHz i7-2600:
+
 `Benchmark: timing 100 iterations`
+
 `Algorithm::LUHN: 69 secs (69.37 usr 0.00 sys)  1.44/s`
+
 `check_digit:      2 secs ( 1.98 usr 0.00 sys) 50.51/s`
+
 `check_digit_fast: 2 secs ( 1.68 usr 0.00 sys) 59.52/s`
+
 `check_digit_rff:  1 secs ( 1.29 usr 0.00 sys) 77.52/s`
 
 So, it's 35x to 53x faster than the original pure Perl module, depending on
@@ -83,9 +88,13 @@ You can find plenty of information about the algorithm by searching the web for
     Algorithm::LUHN module.  Here's a benchmark of 1M total calls to is\_valid():
 
     `Benchmark: timing 100 iterations`
+
     `Algorithm::LUHN: 100 secs (100.29 usr 0.01 sys)  1.00/s`
+
     `is_valid:          3 secs (  2.46 usr 0.11 sys) 38.91/s`
+
     `is_valid_fast:     2 secs (  2.38 usr 0.05 sys) 41.15/s` 
+
     `is_valid_rff:      2 secs (  1.97 usr 0.08 sys) 48.78/s`
 
     Algorithm::LUHN\_XS varies from 38x to 48x times faster than the original
