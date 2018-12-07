@@ -9,6 +9,8 @@
 int   _al_vc[256];
 #define MAX_ERROR_LEN 200
 
+/* you may be asking...why? */
+/* well, windows and older versions of MacOS don't have strndup, so... */
 char * _al_substr(const char* src, const int offset, const int len) {
     char * sub = (char*)malloc(len+1);
     memcpy(sub, src + offset, len);
@@ -16,6 +18,7 @@ char * _al_substr(const char* src, const int offset, const int len) {
     return sub;
 }
 
+/* not thread safe, don't use this module with perl threads */
 int _al_init_vc(SV* hash_ref) {
   HV* hash;
   HE* hash_entry;
