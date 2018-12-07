@@ -30,8 +30,8 @@ Algorithm::LUHN\_XS - Very Fast XS Version of the original Algorithm::LUHN
 This module is an XS version of the original Perl Module Algorithm::LUHN, which
 was written by Tim Ayers.  It should work exactly the same, only substantially
  faster. The supplied check\_digit() routine is 100% compatible with the pure
-Perl Algorithm::LUHN module, while the faster check\_digit\_fast and really fast
-check\_digit\_rff are not. 
+Perl Algorithm::LUHN module, while the faster check\_digit\_fast() and really fast
+check\_digit\_rff() are not. 
 
 How much faster? Here's a benchmark, running on a 3.4GHz i7-2600:
 
@@ -87,8 +87,8 @@ You can find plenty of information about the algorithm by searching the web for
 - is\_valid\_fast CHECKSUMMED\_NUM
 - is\_valid\_rff CHECKSUMMED\_NUM
 
-    Like with check\_digit, we have 3 versions of is\_valid, each one progressively
-    faster than the check\_digit that comes in the original pure Perl 
+    As with check\_digit(), we have 3 versions of is\_valid(), each one progressively
+    faster than the check\_digit() that comes in the original pure Perl 
     Algorithm::LUHN module.  Here's a benchmark of 1M total calls to is\_valid():
 
     `Benchmark: timing 100 iterations`
@@ -104,8 +104,8 @@ You can find plenty of information about the algorithm by searching the web for
     Algorithm::LUHN\_XS varies from 38x to 48x times faster than the original
     pure perl Algorithm::LUHN module. The is\_valid() routine is 100% compatible
     with the original, returning either '1' for success or the empty string ''
-    for failure.   The is\_valid\_fast routine returns 1 for success and 0 for 
-    failure.  Finally, the is\_valid\_rff function also returns 1 for success 
+    for failure.   The is\_valid\_fast() routine returns 1 for success and 0 for 
+    failure.  Finally, the is\_valid\_rff() function also returns 1 for success 
     and 0 for failure, but only works with numeric input.  If you supply any 
     alpha characters, it will return 0.
 
@@ -121,15 +121,15 @@ You can find plenty of information about the algorithm by searching the web for
 - check\_digit\_fast NUM
 
     This function returns the checksum of the given number. If it cannot calculate
-    the check\_digit it will return -1 and set $Algorithm::LUHN\_XS::ERROR to 
-    contain the reason why. It's about 20% faster than check\_digit because the XS
+    the check digit it will return -1 and set $Algorithm::LUHN\_XS::ERROR to 
+    contain the reason why. It's about 20% faster than check\_digit() because the XS
     code in this case only has to return integers.
 
 - check\_digit\_rff NUM
 
     This function returns the checksum of the given number. 
 
-    It's about 50% faster than check\_digit because it doesn't support the valid\_chars() function, and only produces a valid output for numeric input.  If you pass 
+    It's about 50% faster than check\_digit() because it doesn't support the valid\_chars() function, and only produces a valid output for numeric input.  If you pass 
     it input with alpha characters, it will return -1. Works great for Credit 
     Cards, but not for things like [CUSIP identifiers](https://en.wikipedia.org/wiki/CUSIP).
 
@@ -159,13 +159,13 @@ You can find plenty of information about the algorithm by searching the web for
 This module, because of how valid\_chars() stores data in the XS portion,
 is NOT thread safe.
 
-The \_fast and \_rff versions of is\_valid and check\_digit don't have the 
+The \_fast and \_rff versions of is\_valid() and check\_digit() don't have the 
 same return values for failure as the original Algorithm::LUHN module.
 Specifically: 
 
 - is\_valid\_fast() and is\_valid\_rff() return 0 on failure, but
         is\_valid() returns the empty string.
-- check\_digit\_fast() and check\_digit\_rff return -1 on failure, but
+- check\_digit\_fast() and check\_digit\_rff() return -1 on failure, but
         check\_digit() returns undef.
 
 # SEE ALSO
