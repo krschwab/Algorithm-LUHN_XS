@@ -6,10 +6,14 @@ Algorithm::LUHN\_XS - Very Fast XS Version of the original Algorithm::LUHN
 
     use Algorithm::LUHN_XS qw/check_digit is_valid/;
 
+    my $c;
     $c = check_digit("43881234567");
     print "It works\n" if is_valid("43881234567$c");
 
-    $c = check_digit("A2C4E6G8"); # this will cause an error
+    $c = check_digit("A2C4E6G8"); # this will return undef
+    if (!defined($c)) {
+        # couldn't create a check digit
+    }
 
     print "Valid LUHN characters are:\n";
     my %vc = Algorithm::LUHN_XS::valid_chars();
@@ -42,7 +46,7 @@ How much faster? Here's a benchmark, running on a 3.4GHz i7-2600:
 `check_digit_rff:  1 secs ( 1.29 usr 0.00 sys) 77.52/s`
 
 So, it's 35x to 53x faster than the original pure Perl module, depending on
-how much compatibility with the original module you need.
+how much compatibility with the original module you need.  
 
 The rest of the documentation is mostly a copy of the original docs, with some
 additions for functions that are new.
@@ -103,7 +107,7 @@ You can find plenty of information about the algorithm by searching the web for
     for failure.   The is\_valid\_fast routine returns 1 for success and 0 for 
     failure.  Finally, the is\_valid\_rff function also returns 1 for success 
     and 0 for failure, but only works with numeric input.  If you supply any 
-    alpha characters, the return values won't be valid.
+    alpha characters, it will return 0.
 
 - check\_digit NUM
 
@@ -125,10 +129,9 @@ You can find plenty of information about the algorithm by searching the web for
 
     This function returns the checksum of the given number. 
 
-    It's about 50% faster than check\_digit because it ignored the valid\_chars, and
-    only produces a valid output for numeric input.  If you pass it input with alpha
-    characters, the checksum produced won't be right. Works great for Credit Cards,
-    but not for things like <CUSIP identifiers|https://en.wikipedia.org/wiki/CUSIP>.
+    It's about 50% faster than check\_digit because it doesn't support the valid\_chars() function, and only produces a valid output for numeric input.  If you pass 
+    it input with alpha characters, it will return -1. Works great for Credit 
+    Cards, but not for things like [CUSIP identifiers](https://en.wikipedia.org/wiki/CUSIP).
 
 - valid\_chars LIST
 
@@ -146,6 +149,24 @@ You can find plenty of information about the algorithm by searching the web for
 
     If you do not provide LIST,
     this function returns the current valid character map.
+
+    Note that the check\_digit\_rff() and is\_valid\_rff() functions do not support
+    the valid\_chars() function.  Both only support numeric inputs, and map them
+    to their literal values.
+
+# CAVEATS
+
+This module, because of how valid\_chars() stores data in the XS portion,
+is NOT thread safe.
+
+The \_fast and \_rff versions of is\_valid and check\_digit don't have the 
+same return values for failure as the original Algorithm::LUHN module.
+Specifically: 
+
+- is\_valid\_fast() and is\_valid\_rff() return 0 on failure, but
+        is\_valid() returns the empty string.
+- check\_digit\_fast() and check\_digit\_rff return -1 on failure, but
+        check\_digit() returns undef.
 
 # SEE ALSO
 
@@ -174,7 +195,7 @@ the [Damm algorithm](https://en.wikipedia.org/wiki/Damm_algorithm)
 
 [Math::CheckDigits](https://metacpan.org/pod/Math::CheckDigits) implements yet another approach to check digits.
 
-Tim Ayers has also written a
+Neil Bowers has also written a
 [review of LUHN modules](http://neilb.org/reviews/luhn.html),
 which covers them in more detail than this section.
 
@@ -199,7 +220,9 @@ the same terms as Perl itself.
 
 # CREDITS
 
-Tim Ayers, for the original pure perl version of Algorithm::LUHN
+Tim Ayers, for the original pure perl version of Algorithm::LUHN.
+
+Neil Bowers, the current maintainer of Algorithm::LUHN.
 
 The inspiration for this module was a PerlMonks post I made here:
 [https://perlmonks.org/?node\_id=1226543](https://perlmonks.org/?node_id=1226543), and I received help 

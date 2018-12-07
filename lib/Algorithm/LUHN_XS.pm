@@ -1,5 +1,5 @@
 package Algorithm::LUHN_XS;
-$Algorithm::LUHN_XS::VERSION = '1.04';
+$Algorithm::LUHN_XS::VERSION = '1.05';
 require XSLoader;
 XSLoader::load('Algorithm::LUHN_XS', $VERSION);
 use 5.006;
@@ -9,7 +9,9 @@ use Exporter;
 
 our @ISA       = qw/Exporter/;
 our @EXPORT    = qw//;
-our @EXPORT_OK = qw/check_digit check_digit_fast is_valid valid_chars/;
+our @EXPORT_OK = qw/check_digit check_digit_fast check_digit_rff
+                    is_valid  is_valid_fast is_valid_rff
+                    valid_chars/;
 our $ERROR;
 
 # The hash of valid characters.
@@ -27,10 +29,14 @@ Algorithm::LUHN_XS - Very Fast XS Version of the original Algorithm::LUHN
 
   use Algorithm::LUHN_XS qw/check_digit is_valid/;
 
+  my $c;
   $c = check_digit("43881234567");
   print "It works\n" if is_valid("43881234567$c");
 
-  $c = check_digit("A2C4E6G8"); # this will cause an error
+  $c = check_digit("A2C4E6G8"); # this will return undef
+  if (!defined($c)) {
+      # couldn't create a check digit
+  }
 
   print "Valid LUHN characters are:\n";
   my %vc = Algorithm::LUHN_XS::valid_chars();
@@ -51,14 +57,19 @@ Perl Algorithm::LUHN module, while the faster check_digit_fast and really fast
 check_digit_rff are not. 
 
 How much faster? Here's a benchmark, running on a 3.4GHz i7-2600:
+
 C<Benchmark: timing 100 iterations>
+
 C<Algorithm::LUHN: 69 secs (69.37 usr 0.00 sys)  1.44/s>
+
 C<check_digit:      2 secs ( 1.98 usr 0.00 sys) 50.51/s>
+
 C<check_digit_fast: 2 secs ( 1.68 usr 0.00 sys) 59.52/s>
+
 C<check_digit_rff:  1 secs ( 1.29 usr 0.00 sys) 77.52/s>
 
 So, it's 35x to 53x faster than the original pure Perl module, depending on
-how much compatibility with the original module you need.
+how much compatibility with the original module you need.  
 
 The rest of the documentation is mostly a copy of the original docs, with some
 additions for functions that are new.
@@ -111,9 +122,13 @@ faster than the check_digit that comes in the original pure Perl
 Algorithm::LUHN module.  Here's a benchmark of 1M total calls to is_valid():
 
 C<Benchmark: timing 100 iterations>
+
 C<Algorithm::LUHN: 100 secs (100.29 usr 0.01 sys)  1.00/s>
+
 C<is_valid:          3 secs (  2.46 usr 0.11 sys) 38.91/s>
+
 C<is_valid_fast:     2 secs (  2.38 usr 0.05 sys) 41.15/s> 
+
 C<is_valid_rff:      2 secs (  1.97 usr 0.08 sys) 48.78/s>
 
 Algorithm::LUHN_XS varies from 38x to 48x times faster than the original
@@ -122,7 +137,7 @@ with the original, returning either '1' for success or the empty string ''
 for failure.   The is_valid_fast routine returns 1 for success and 0 for 
 failure.  Finally, the is_valid_rff function also returns 1 for success 
 and 0 for failure, but only works with numeric input.  If you supply any 
-alpha characters, the return values won't be valid.
+alpha characters, it will return 0.
 
 =cut
 
@@ -152,10 +167,9 @@ code in this case only has to return integers.
 
 This function returns the checksum of the given number. 
 
-It's about 50% faster than check_digit because it ignored the valid_chars, and
-only produces a valid output for numeric input.  If you pass it input with alpha
-characters, the checksum produced won't be right. Works great for Credit Cards,
-but not for things like <CUSIP identifiers|https://en.wikipedia.org/wiki/CUSIP>.
+It's about 50% faster than check_digit because it doesn't support the valid_chars() function, and only produces a valid output for numeric input.  If you pass 
+it input with alpha characters, it will return -1. Works great for Credit 
+Cards, but not for things like L<CUSIP identifiers|https://en.wikipedia.org/wiki/CUSIP>.
 
 =cut
 
@@ -177,6 +191,10 @@ already considered valid but not in LIST will remain valid.
 
 If you do not provide LIST,
 this function returns the current valid character map.
+
+Note that the check_digit_rff() and is_valid_rff() functions do not support
+the valid_chars() function.  Both only support numeric inputs, and map them
+to their literal values.
 
 =cut
 
@@ -201,6 +219,26 @@ sub _dump_map {
 =cut
 
 __END__
+
+=head1 CAVEATS
+
+This module, because of how valid_chars() stores data in the XS portion,
+is NOT thread safe.
+
+The _fast and _rff versions of is_valid and check_digit don't have the 
+same return values for failure as the original Algorithm::LUHN module.
+Specifically: 
+
+=over 4
+
+=item * is_valid_fast() and is_valid_rff() return 0 on failure, but
+        is_valid() returns the empty string.
+
+=item * check_digit_fast() and check_digit_rff return -1 on failure, but
+        check_digit() returns undef.
+
+=back
+
 
 =head1 SEE ALSO
 
@@ -229,7 +267,7 @@ the L<Damm algorithm|https://en.wikipedia.org/wiki/Damm_algorithm>
 
 L<Math::CheckDigits> implements yet another approach to check digits.
 
-Tim Ayers has also written a
+Neil Bowers has also written a
 L<review of LUHN modules|http://neilb.org/reviews/luhn.html>,
 which covers them in more detail than this section.
 
@@ -254,7 +292,9 @@ the same terms as Perl itself.
 
 =head1 CREDITS
 
-Tim Ayers, for the original pure perl version of Algorithm::LUHN
+Tim Ayers, for the original pure perl version of Algorithm::LUHN.
+
+Neil Bowers, the current maintainer of Algorithm::LUHN.
 
 The inspiration for this module was a PerlMonks post I made here:
 L<https://perlmonks.org/?node_id=1226543>, and I received help 
