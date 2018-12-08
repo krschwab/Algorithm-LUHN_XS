@@ -18,6 +18,11 @@ char * _al_substr(const char* src, const int offset, const int len) {
     return sub;
 }
 
+/* needed for Devel::Cover */
+void _al_test_croak() {
+    S_croak_memory_wrap();
+}
+
 /* not thread safe, don't use this module with perl threads */
 int _al_init_vc(SV* hash_ref) {
   HV* hash;
@@ -34,7 +39,7 @@ int _al_init_vc(SV* hash_ref) {
     hash_entry = hv_iternext(hash);
     sv_key = hv_iterkeysv(hash_entry);
     sv_val = hv_iterval(hash, hash_entry);
-    _al_vc[(SvPV(sv_key,PL_na))[0]]=atoi(SvPV(sv_val,PL_na));
+    _al_vc[(SvPV(sv_key,PL_na))[0]]=atoi(SvPV(sv_val,PL_na)); /* #uncoverable statment */ 
   }
   return 1;
 }
@@ -51,7 +56,7 @@ int check_digit_rff(char *input) {
     for (i = len; i >=0; --i) {
        j=input[i]-48;
        /* only handle numeric input */
-       if (j < 0 || j > 9) {return -1;}
+       if (j > 9 || j < 0) {return -1;} 
        checksum += j;
        if (flip ^= 1) {
            checksum += deltas[j];
@@ -125,7 +130,7 @@ SV* is_valid(char *input) {
     char cd=input[len-1];
     char c=check_digit_fast(leftmost)+'0';
     free(leftmost);
-    if (c == -1) {
+    if (c < 48) {
         SV* rv=newSVpv(NULL,1);
         return rv;
     } else {
@@ -154,7 +159,7 @@ int is_valid_fast(char *input) {
     char c=check_digit_fast(leftmost)+'0';
     free(leftmost);
 
-    if (c == -1) {
+    if (c < 48) {
         return 0;
     } else {
         if (cd == c) {
@@ -166,7 +171,6 @@ int is_valid_fast(char *input) {
             SV *error;
             error=get_sv("Algorithm::LUHN_XS::ERROR",GV_ADD);
             sv_setpv(error,err);
-            SV* rv=newSVpv(NULL,1);
             return 0;
         }
     }
@@ -183,7 +187,7 @@ int is_valid_rff(char *input) {
     int d=check_digit_rff(leftmost);
     csum=d+'0';
     free(leftmost);
-    if (csum == -1) {
+    if (csum < 48) { 
         return 0;
     } else {
         if (cd == csum) {
@@ -226,3 +230,6 @@ is_valid_fast(input)
 int
 is_valid_rff(input)
 	char *	input
+
+void
+_al_test_croak()

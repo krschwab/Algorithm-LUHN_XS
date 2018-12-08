@@ -1,6 +1,6 @@
 package Algorithm::LUHN_XS;
-$Algorithm::LUHN_XS::VERSION = '1.05';
-require XSLoader;
+$Algorithm::LUHN_XS::VERSION = '1.06';
+require XSLoader; # uncoverable statement
 XSLoader::load('Algorithm::LUHN_XS', $VERSION);
 use 5.006;
 use strict;
@@ -212,6 +212,7 @@ sub _dump_map {
   my %foo = valid_chars();
   my ($k,$v);
   print "$k => $v\n" while (($k, $v) = each %foo);
+  return 1;
 }
 
 =back

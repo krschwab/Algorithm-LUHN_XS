@@ -1,11 +1,10 @@
 #!/usr/bin/perl -w
-
 use strict;
 use Test;
 use Algorithm::LUHN_XS qw/check_digit check_digit_fast check_digit_rff
                           is_valid is_valid_fast is_valid_rff/;
 
-BEGIN { plan tests => 61 }
+BEGIN { plan tests => 69 }
 
 # Check some straight-forward, numeric only values
 my @values = qw/424242424242424 2 83764912 8 123456781234567 0 4992739871 6/;
@@ -65,5 +64,15 @@ ok(($c=check_digit_rff($nulls))==-1);
 ok((!is_valid($nulls)));
 ok((!is_valid_fast($nulls)));
 ok((!is_valid_rff($nulls)));
+# test non-numeric
+ok((check_digit_rff("zyx") == -1));
+ok((check_digit_rff("\n\n") == -1));
+ok((check_digit_fast("\n\n") == -1));
+ok(!defined(check_digit("\n\n")));
+ok(!is_valid("\n\nzzz"));
+ok(!is_valid_fast("\n\nzzz"));
+ok(!is_valid_rff("\n\nzzz"));
+# Needed for coverage in Devel::Cover
+ok(!eval{Algorithm::LUHN_XS::_al_test_croak()});
 
 __END__
