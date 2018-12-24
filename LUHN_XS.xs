@@ -34,7 +34,7 @@ int _al_init_vc(SV* hash_ref) {
     hash_entry = hv_iternext(hash);
     sv_key = hv_iterkeysv(hash_entry);
     sv_val = hv_iterval(hash, hash_entry);
-    _al_vc[(SvPV(sv_key,PL_na))[0]]=atoi(SvPV(sv_val,PL_na)); /* #uncoverable statment */ 
+    _al_vc[(SvPV(sv_key,PL_na))[0]]=atoi(SvPV(sv_val,PL_na)); 
   }
   return 1;
 }
@@ -79,7 +79,7 @@ int check_digit_fast(unsigned char *input) {
         if (num == -1)  { 
           /* Don't change the error text, perl tests depend on the exact words */ 
           unsigned char err[MAX_ERROR_LEN];
-          snprintf(err,MAX_ERROR_LEN,"Invalid character '%c', in check_digit calculation",input[i]);
+          snprintf(err,MAX_ERROR_LEN,"Invalid character '%c', in check_digit calculation string [%s]",input[i],input);
           SV *error;
           error=get_sv("Algorithm::LUHN_XS::ERROR",GV_ADD);
           sv_setpv(error,err);
