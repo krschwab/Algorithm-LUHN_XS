@@ -1,5 +1,5 @@
 package Algorithm::LUHN_XS;
-$Algorithm::LUHN_XS::VERSION = '1.06';
+$Algorithm::LUHN_XS::VERSION = '1.07';
 require XSLoader; # uncoverable statement
 XSLoader::load('Algorithm::LUHN_XS', $VERSION);
 use 5.006;
